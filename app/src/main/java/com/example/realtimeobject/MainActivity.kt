@@ -2,6 +2,7 @@ package com.example.realtimeobject
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -19,6 +20,7 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.view.Surface
 import android.view.TextureView
+import android.view.View
 import android.widget.ImageView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -33,6 +35,8 @@ import org.tensorflow.lite.support.image.ops.ResizeOp
 
 class MainActivity : AppCompatActivity() {
 
+
+    var isUsingFrontCamera = false
     lateinit var labels:List<String>
     var colors = listOf<Int>(
         Color.BLUE, Color.GREEN, Color.RED, Color.CYAN, Color.GRAY, Color.BLACK,
@@ -127,8 +131,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     @SuppressLint("MissingPermission")
-    fun open_camera() {
-        cameraManager.openCamera(cameraManager.cameraIdList[0], object:CameraDevice.StateCallback(){
+    fun open_camera(){
+        val cameraId = if (isUsingFrontCamera) cameraManager.cameraIdList[1] else cameraManager.cameraIdList[0]
+        cameraManager.openCamera(cameraId, object:CameraDevice.StateCallback(){
             override fun onOpened(p0: CameraDevice) {
                 cameraDevice = p0
 
@@ -151,11 +156,11 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onDisconnected(p0: CameraDevice) {
-                TODO("Not yet implemented")
+                cameraDevice.close()
             }
 
             override fun onError(p0: CameraDevice, p1: Int) {
-                TODO("Not yet implemented")
+                cameraDevice.close()
             }
         }, handler)
     }
@@ -176,4 +181,11 @@ class MainActivity : AppCompatActivity() {
             get_permission()
         }
     }
+
+    fun switchCamera(view: View) {
+        cameraDevice.close() // Close the current camera
+        isUsingFrontCamera = !isUsingFrontCamera // Toggle between front and back camera
+        open_camera() // Reopen with the new camera
+    }
+
 }

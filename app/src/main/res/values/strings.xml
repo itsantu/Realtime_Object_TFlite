@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Realtime Object</string>
+    <string name="back_camera">Back camera</string>
 </resources>
